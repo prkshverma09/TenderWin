@@ -1,0 +1,25 @@
+{
+  "name": "@tenderwin/teams-bot",
+  "version": "1.0.0",
+  "main": "dist/bot.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc -w"
+  },
+  "dependencies": {
+    "botbuilder": "^4.20.0",
+    "restify": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@types/restify": "^8.5.8",
+    "@types/supertest": "^7.2.0",
+    "botbuilder-testing": "^4.20.0",
+    "jest": "^29.5.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  }
+}

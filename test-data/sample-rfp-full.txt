@@ -1,0 +1,78 @@
+REQUEST FOR PROPOSAL (RFP)
+Enterprise Software Platform
+RFP-2025-001
+
+Issued by: Contoso Ltd
+Issue date: February 2025
+Submission deadline: March 15, 2025
+
+——————————————————————————————
+1. INTRODUCTION AND BACKGROUND
+——————————————————————————————
+
+Contoso Ltd is seeking proposals for an enterprise software platform to support sales, project delivery, and compliance. The solution must integrate with existing Microsoft 365 and CRM systems and must meet our security and data residency requirements.
+
+——————————————————————————————
+2. SCOPE OF WORK
+——————————————————————————————
+
+2.1 Core capabilities required
+- Proposal and RFP response management
+- Document generation and versioning
+- Integration with SharePoint and Microsoft Teams
+- Reporting and dashboards
+
+2.2 Out of scope
+- Custom hardware or on-premise-only deployment where cloud is mandated
+
+——————————————————————————————
+3. SECURITY AND COMPLIANCE
+——————————————————————————————
+
+3.1 Data encryption
+Describe how data at rest and in transit is encrypted. Specify algorithms and key management.
+
+3.2 Access control and authentication
+How does your solution enforce access control (e.g. RBAC, MFA)? Describe integration with Azure AD / Entra ID.
+
+3.3 Audit and logging
+What audit logs are available? Retention period and export format.
+
+3.4 Compliance
+List certifications (e.g. SOC 2, ISO 27001, GDPR) and attestation availability.
+
+——————————————————————————————
+4. TECHNICAL REQUIREMENTS
+——————————————————————————————
+
+4.1 Deployment model
+On-premise, cloud, or hybrid? Supported regions and data residency options.
+
+4.2 Integration
+APIs, webhooks, and supported integration methods (REST, GraphQL, etc.). Compatibility with Salesforce and Microsoft Dynamics.
+
+4.3 Support and SLA
+Support channels (email, portal, phone), response times, and uptime SLA.
+
+——————————————————————————————
+5. COMMERCIAL TERMS
+——————————————————————————————
+
+5.1 Pricing model
+Per-seat, subscription, or project-based. Payment terms.
+
+5.2 Contract term
+Initial term, renewal, and termination conditions.
+
+——————————————————————————————
+6. SUBMISSION REQUIREMENTS
+——————————————————————————————
+
+- Executive summary (max 2 pages)
+- Technical response addressing each section above
+- Pricing sheet in the format provided
+- References (2–3 similar engagements)
+
+——————————————————————————————
+
+[ Use this longer document in Word for a full demo: open the TenderWin sidebar, click "Draft Answers" for one or more sections, and show the citation widget and confidence score. ]

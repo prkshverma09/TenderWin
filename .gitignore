@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# pnpm
+.pnpm-store/
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+.turbo/
+.next/
+out/
+*.tsbuildinfo
+
+# Env and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Optional
+*.local
+
+# Playwright
+playwright/.cache/
+
+# Vercel / Netlify
+.vercel/
+.netlify/
