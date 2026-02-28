@@ -22,6 +22,8 @@ declare global {
 }
 /** Get document body text. Returns placeholder when not in Word. */
 export declare function getDocumentText(): Promise<string>;
-/** Insert text at cursor/selection. Uses Office.context.document.body.insertText when available. */
-export declare function insertTextAtSelection(text: string): Promise<void>;
+/** Get selection text or paragraph at cursor (for question-at-cursor). */
+export declare function getSelectionOrParagraphText(): Promise<string>;
+/** Insert text at cursor/selection. Returns true if inserted, false otherwise. */
+export declare function insertTextAtSelection(text: string): Promise<boolean>;
 //# sourceMappingURL=document.d.ts.map

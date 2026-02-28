@@ -209,7 +209,7 @@ All tests should pass. Mock data (e.g. “Cloud Migration Proposal,” “TechCo
 |------|--------|------------------|
 | 1 | Open Word and sideload the TenderWin add-in (manifest points to dev server or deployed URL). | Task pane opens. |
 | 2 | Paste `test-data/sample-rfp-section.txt` into the document. | Document shows RFP-style questions. |
-| 3 | Place cursor where an answer should go (e.g. under 3.1). | Cursor is ready for insertion. |
+| 3 | Place cursor **after** the RFP question to answer (e.g. at end of 3.1). | Add-in sends that question to the agent and inserts the draft at the cursor. |
 | 4 | In the task pane, click “Draft Answers.” | Mock answer is inserted (e.g. “Mocked text”) at the cursor. |
 | 5 | Check the citation widget. | Confidence score and expandable source details are visible. |
 
@@ -223,7 +223,7 @@ Use these steps when testing in **Word on the web** at [office.com](https://offi
 | 2 | **Home → Add-ins → More Settings → Upload My Add-in** → select **`apps/word-addin/manifest.xml`** (if not already sideloaded). | Add-in appears in the list; task pane may open. |
 | 3 | If the task pane is not open: **Home → Add-ins** → select **TenderWin**. | TenderWin task pane opens; “Draft Answers” and citation widget visible. |
 | 4 | Paste content from `test-data/sample-rfp-section.txt` into the document. | Document shows RFP-style questions. |
-| 5 | Place the cursor where an answer should go (e.g. under 3.1). | Cursor is ready for insertion. |
+| 5 | Place the cursor **after** the RFP question to answer (e.g. at end of 3.1). | Add-in sends that question to the agent and inserts the draft at the cursor. |
 | 6 | In the task pane, click **“Draft Answers.”** | Mock answer is inserted at the cursor (or Airia response if wired). |
 | 7 | Check the citation widget. | Confidence score and expandable source details are visible. |
 | 8 | (Optional) With Teams bot running and `VITE_TEAMS_BOT_URL` set, click **“Ping Expert.”** | Add-in shows “Waiting for expert…”; after approval in Teams, “Expert approved.” and reply inserted. |

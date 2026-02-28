@@ -12,7 +12,8 @@ jest.mock('../../services/airia', () => ({
 
 jest.mock('../document', () => ({
   getDocumentText: jest.fn().mockResolvedValue('Sample RFP section text'),
-  insertTextAtSelection: jest.fn().mockResolvedValue(undefined),
+  getSelectionOrParagraphText: jest.fn().mockResolvedValue(''),
+  insertTextAtSelection: jest.fn().mockResolvedValue(true),
 }));
 
 const mockRequestHandoff = jest.fn();
@@ -56,7 +57,7 @@ describe('App Component', () => {
     const button = screen.getByRole('button', { name: /draft answers/i });
     fireEvent.click(button);
     await waitFor(() => {
-      expect(insertTextAtSelection).toHaveBeenCalledWith('Mocked text');
+      expect(insertTextAtSelection).toHaveBeenCalledWith('\n\nMocked text');
     });
   });
 

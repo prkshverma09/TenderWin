@@ -29,14 +29,61 @@ export async function getDocumentText() {
         return e2eText;
     return '[Open a document in Word to send its text to Airia.]';
 }
-/** Insert text at cursor/selection. Uses Office.context.document.body.insertText when available. */
-export async function insertTextAtSelection(text) {
-    const office = (typeof globalThis !== 'undefined' ? globalThis : window);
-    const insertText = office?.Office?.context?.document?.body?.insertText;
-    if (insertText) {
-        insertText(text);
-        return;
+/** Get selection or paragraph at cursor (tries paragraph first for cursor-in-question). */
+export async function getSelectionOrParagraphText() {
+    const Office = (typeof globalThis !== 'undefined' ? globalThis : window);
+    if (!Office?.Word?.run)
+        return '';
+    try {
+        const text = await Office.Word.run(async (context) => {
+            const ctx = context;
+            const selection = ctx.document.getSelection();
+            const paras = selection.paragraphs;
+            if (paras) {
+                try {
+                    const first = paras.getFirst();
+                    first.load('text');
+                    await ctx.sync();
+                    const pText = (first.text ?? '').trim();
+                    if (pText.length > 0)
+                        return pText;
+                }
+                catch {
+                    /* fall through */
+                }
+            }
+            selection.load('text');
+            await ctx.sync();
+            return (selection.text ?? '').trim();
+        });
+        return text ?? '';
     }
-    console.warn('Office.context.document.body.insertText not available.');
+    catch (e) {
+        console.warn('getSelectionOrParagraphText failed:', e);
+        return '';
+    }
+}
+/** Insert text at cursor/selection. Returns true if inserted, false otherwise. */
+export async function insertTextAtSelection(text) {
+    const Office = (typeof globalThis !== 'undefined' ? globalThis : window);
+    if (!Office?.Word?.run) {
+        console.warn('Word.run not available; cannot insert at cursor.');
+        return false;
+    }
+    if (!text || String(text).trim().length === 0)
+        return true;
+    try {
+        await Office.Word.run(async (context) => {
+            const selection = context.document.getSelection();
+            const insertLoc = Office.Word?.InsertLocation?.After ?? 'After';
+            selection.insertText(text, insertLoc);
+            await context.sync();
+        });
+        return true;
+    }
+    catch (e) {
+        console.warn('insertTextAtSelection failed:', e);
+        return false;
+    }
 }
 //# sourceMappingURL=document.js.map

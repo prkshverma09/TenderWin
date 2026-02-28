@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { draftFromDocument, type DraftResult } from '../../services/airia';
 import { requestHandoff, getHandoffStatus } from '../../services/handoff';
-import { getDocumentText, insertTextAtSelection } from '../document';
+import { getDocumentText, getSelectionOrParagraphText, insertTextAtSelection } from '../document';
 
 const POLL_INTERVAL_MS = 2500;
 
@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [handoffMessage, setHandoffMessage] = useState<string | null>(null);
   const [lastDraftText, setLastDraftText] = useState('');
+  const [insertWarning, setInsertWarning] = useState<string | null>(null);
   const handoffPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const hasDraftContext = Boolean(citation?.text || lastDraftText);
@@ -28,12 +29,17 @@ const App: React.FC = () => {
 
   const handleDraftAnswers = async () => {
     setError(null);
+    setInsertWarning(null);
     setLoading(true);
     try {
-      const documentText = await getDocumentText();
-      const result = await draftFromDocument(documentText);
+      const [documentText, selectionText] = await Promise.all([getDocumentText(), getSelectionOrParagraphText()]);
+      const result = await draftFromDocument(documentText, selectionText || undefined);
       setLastDraftText(result.text);
-      await insertTextAtSelection(result.text);
+      const toInsert = result.text ? `\n\n${result.text}` : '';
+      const inserted = await insertTextAtSelection(toInsert);
+      if (toInsert && !inserted) {
+        setInsertWarning('Draft ready below but could not insert in document. Click in the document where you want the answer, then try again, or copy from below.');
+      }
       setCitation(result);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
@@ -44,7 +50,7 @@ const App: React.FC = () => {
           : message
       );
       console.error(e);
-      await insertTextAtSelection(`[Error: ${message}]`);
+      await insertTextAtSelection(`\n\n[Error: ${message}]`);
     } finally {
       setLoading(false);
     }
@@ -117,7 +123,15 @@ const App: React.FC = () => {
           {error}
         </div>
       )}
+      {insertWarning && (
+        <div style={{ marginBottom: '12px', padding: '8px', background: '#fff4e5', borderRadius: '4px', fontSize: '14px' }}>
+          {insertWarning}
+        </div>
+      )}
 
+      <p style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>
+        Place your cursor in the question (e.g. section 3.1) or select the question text, then click Draft Answers. The answer will be inserted at the cursor.
+      </p>
       <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
         <button
           onClick={handleDraftAnswers}

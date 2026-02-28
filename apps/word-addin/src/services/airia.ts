@@ -28,15 +28,16 @@ function hasDirectConfig(): boolean {
 
 /**
  * Draft an RFP answer from document context.
+ * If selectionText is provided (e.g. the question at the cursor), the agent is asked to answer that specifically.
  * Calls your proxy or the Airia API; if no env is set, returns mock data.
  */
-export async function draftFromDocument(documentText: string): Promise<DraftResult> {
+export async function draftFromDocument(documentText: string, selectionText?: string): Promise<DraftResult> {
   const proxyUrl = getEnv('VITE_AIRIA_PROXY_URL');
   if (proxyUrl) {
     const res = await fetch(proxyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ documentText }),
+      body: JSON.stringify({ documentText, selectionText: selectionText ?? undefined }),
     });
     if (!res.ok) {
       let msg = `Airia proxy error: ${res.status}`;

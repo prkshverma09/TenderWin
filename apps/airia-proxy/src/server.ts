@@ -46,6 +46,12 @@ app.post('/airia', async (req, res) => {
     return;
   }
   const documentText = req.body?.documentText ?? '';
+  const selectionText = typeof req.body?.selectionText === 'string' ? req.body.selectionText.trim() : '';
+  // When user places cursor after a question, send a focused prompt so the agent answers that question (not a generic reply)
+  const userInput =
+    selectionText.length > 0
+      ? `Draft a concise RFP answer to this question (use the full document as context):\n\nQuestion: ${selectionText}\n\n---\nDocument context:\n${documentText}`
+      : documentText;
   const pathTemplate =
     process.env.AIRIA_INVOKE_PATH ?? process.env.VITE_AIRIA_INVOKE_PATH ?? '/v1/PipelineExecution/Multipart/{agentId}';
   const invokePath = pathTemplate.replace(/\{agentId\}/g, agentId).replace(/\/\/+/g, '/');
@@ -62,7 +68,7 @@ app.post('/airia', async (req, res) => {
       method: 'POST',
       headers,
       // v2 PipelineExecution expects userInput (camelCase) per Airia API example
-    body: JSON.stringify({ userInput: documentText, asyncOutput: false }),
+    body: JSON.stringify({ userInput, asyncOutput: false }),
     });
     if (!out.ok) {
       let body: string | undefined;
