@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment node
+ */
 import { readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { describe, it, expect } from 'vitest';
