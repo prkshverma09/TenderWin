@@ -60,3 +60,11 @@ The add-in expects a **main answer text** and optionally **confidence** and **so
 ---
 
 You do **not** need to create a separate agent for testing vs production; one TenderWin agent with the above is enough for both the add-in and E2E.
+
+---
+
+## 7. Ping Expert (optional)
+
+**Where:** `apps/word-addin/.env.local`
+
+**What to do:** To use the "Ping Expert" button in the add-in (handoff to Teams, Adaptive Card approve/reject), set **`VITE_TEAMS_BOT_URL`** to your Teams bot base URL (e.g. `http://localhost:3978` for local dev, or your deployed bot URL). See [E2E_SETUP_AND_TEST_WITH_AIRIA.md](../E2E_SETUP_AND_TEST_WITH_AIRIA.md) Section 7.

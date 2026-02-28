@@ -38,9 +38,10 @@ jobs:
 ## Structure
 
 - `apps/word-addin` – React task pane for Word (Vite + Jest)
-- `apps/teams-bot` – Bot Framework bot for "Ping Expert" (Jest)
+- `apps/teams-bot` – Bot Framework bot for "Ping Expert"; in-process handoff store, POST/GET `/api/handoff`, Adaptive Card approve/reject (Jest)
+- `apps/mcp-gateway` – HTTP gateway exposing SharePoint and Salesforce MCP servers (optional `MCP_GATEWAY_API_KEY` for `/sharepoint` and `/salesforce`)
 - `packages/mcp-sharepoint` – MCP server for past proposals (Vitest)
 - `packages/mcp-salesforce` – MCP server for client context (Jest)
-- `tests/e2e` – Playwright E2E for Word Add-in flow
+- `tests/e2e` – Playwright E2E for Word Add-in flow (includes Ping Expert with stubbed handoff when not using real Airia)
 
 See [PRD.md](PRD.md) and [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for product and implementation details.

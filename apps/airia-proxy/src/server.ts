@@ -61,8 +61,8 @@ app.post('/airia', async (req, res) => {
     const out = await fetch(invokeUrl, {
       method: 'POST',
       headers,
-      // v2 PipelineExecution expects UserInput (not message)
-    body: JSON.stringify({ UserInput: documentText }),
+      // v2 PipelineExecution expects userInput (camelCase) per Airia API example
+    body: JSON.stringify({ userInput: documentText, asyncOutput: false }),
     });
     if (!out.ok) {
       let body: string | undefined;

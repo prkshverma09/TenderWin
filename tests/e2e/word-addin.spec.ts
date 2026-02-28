@@ -17,6 +17,8 @@ const STUB_RESPONSE = {
   sources: [{ title: 'E2E Source', snippet: 'E2E snippet for automated test.' }],
 };
 
+const E2E_EXPERT_REPLY = 'E2E expert approved text';
+
 test('Word Add-in: Draft Answers works E2E (stubbed Airia)', async ({ page }) => {
   if (USE_REAL_AIRIA) test.skip();
 
@@ -57,6 +59,83 @@ test('Word Add-in: Draft Answers works E2E (stubbed Airia)', async ({ page }) =>
   const firstSource = STUB_RESPONSE.sources[0];
   await expect(page.getByText(`Source Data: ${firstSource!.title}`)).toBeVisible();
   await expect(page.getByText(firstSource!.snippet)).toBeVisible();
+});
+
+test('Word Add-in: Ping Expert works E2E (stubbed handoff)', async ({ page }) => {
+  if (USE_REAL_AIRIA) test.skip();
+
+  let handoffPostBody: { sessionId?: string; question?: string; draftText?: string } | null = null;
+  let statusCallCount = 0;
+
+  // Stub handoff: POST returns 200 with sessionId
+  await page.route('**/api/handoff', async (route) => {
+    const req = route.request();
+    if (req.method() === 'POST') {
+      try {
+        handoffPostBody = req.postDataJSON();
+      } catch {
+        handoffPostBody = null;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, sessionId: handoffPostBody?.sessionId ?? 'e2e-session' }),
+      });
+      return;
+    }
+    return route.continue();
+  });
+
+  // Stub handoff status: first call pending, then approved with expertReply
+  await page.route('**/api/handoff/status*', async (route) => {
+    if (route.request().method() !== 'GET') return route.continue();
+    statusCallCount += 1;
+    const body =
+      statusCallCount === 1
+        ? { status: 'pending' }
+        : { status: 'approved' as const, expertReply: E2E_EXPERT_REPLY };
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    });
+  });
+
+  // Stub Airia so Draft Answers works
+  await page.route('**/*', async (route) => {
+    const req = route.request();
+    if (req.method() !== 'POST') return route.continue();
+    const url = req.url();
+    const isAiria =
+      url.includes('api.airia.ai') ||
+      url.includes('/airia') ||
+      url.includes('PipelineExecution');
+    if (!isAiria) return route.continue();
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(STUB_RESPONSE),
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.locator('h1')).toHaveText('TenderWin Word Add-in');
+
+  const draftButton = page.getByRole('button', { name: 'Draft Answers' });
+  await draftButton.click();
+  await expect(page.getByRole('button', { name: 'Draft Answers' })).toBeEnabled({ timeout: 15000 });
+  await expect(page.getByTestId('draft-result-text')).toContainText(STUB_RESPONSE.text, { timeout: 5000 });
+
+  const pingExpertButton = page.getByTestId('ping-expert-button');
+  await expect(pingExpertButton).toBeVisible();
+  await pingExpertButton.click();
+
+  await expect(page.getByTestId('expert-approved-message')).toContainText('Expert approved', { timeout: 15000 });
+  await expect(page.getByTestId('expert-reply-text')).toContainText(E2E_EXPERT_REPLY);
+
+  expect(handoffPostBody).not.toBeNull();
+  expect(handoffPostBody!.sessionId).toBeTruthy();
+  expect(handoffPostBody!.draftText === STUB_RESPONSE.text || handoffPostBody!.question).toBeTruthy();
 });
 
 test('Word Add-in: Draft Answers works E2E (real Airia)', async ({ page }) => {

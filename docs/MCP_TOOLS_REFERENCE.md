@@ -16,7 +16,22 @@ Both servers are exposed over HTTP by the **MCP Gateway** (`apps/mcp-gateway`) a
 - **SharePoint:** `http://localhost:3100/sharepoint` (or your ngrok/deployed URL + `/sharepoint`)
 - **Salesforce:** `http://localhost:3100/salesforce` (or your ngrok/deployed URL + `/salesforce`)
 
+If **`MCP_GATEWAY_API_KEY`** is set (see root `.env.example`), the gateway requires the **`X-API-Key`** header on requests to `/sharepoint` and `/salesforce`; `GET /health` remains open. When registering these URLs in Airia, configure the API key if your gateway uses it.
+
 The Airia agent connects to these URLs as **Custom MCP Servers** and calls the tools when the user clicks **Draft Answers** in the Word add-in.
+
+### Data files (JSON)
+
+All tool data is stored as JSON under each package’s **`data/`** directory and loaded at server startup:
+
+| Package              | File(s)                                                                 | Description |
+|----------------------|-------------------------------------------------------------------------|--------------|
+| `mcp-sharepoint`     | `packages/mcp-sharepoint/data/proposals.json`                           | 20 past proposals (`id`, `title`, `client`, `date`, `content`). Fallback: 2-item in-code list if file missing. |
+| `mcp-salesforce`     | `packages/mcp-salesforce/data/accounts.json`                            | 19 accounts (id, name, industry, website, billing, revenue, employees, description). Fallback: empty array. |
+| `mcp-salesforce`     | `packages/mcp-salesforce/data/opportunities.json`                      | 22 opportunities (id, accountId, name, amount, stageName, closeDate, probability, description). Fallback: empty array. |
+| `mcp-salesforce`     | `packages/mcp-salesforce/data/client-context.json`                     | 7 client-context profiles (id, name, version, description, project, environment). Fallback: single default profile. |
+
+Paths are resolved relative to the package (e.g. when the server runs from `dist/`, it loads `../data/<file>.json`). You can edit these JSON files to add or change data without changing code.
 
 ---
 
@@ -35,7 +50,7 @@ Capabilities: **tools** and **resources**.
 |----------|--------|----------|-------------|
 | `query`  | string | Yes      | Search term matched against proposal **title**, **client**, and **content** (case-insensitive). |
 
-**Where the data lives:** Proposals are loaded from **`packages/mcp-sharepoint/data/proposals.json`** at server startup. The file contains **20 realistic past proposals** (e.g. Cloud Migration, Data Center Upgrade, FedRAMP, Healthcare HIPAA, Financial Services, Retail, Manufacturing, Legal, etc.) with `id`, `title`, `client`, `date`, and `content`. If the file is missing or invalid, the server falls back to a minimal in-memory list so it still starts.
+**Where the data lives:** Proposals are loaded from **`packages/mcp-sharepoint/data/proposals.json`** at server startup. The file contains **20 realistic past proposals** (e.g. Cloud Migration, Data Center Upgrade, FedRAMP, Healthcare HIPAA, Financial Services, Retail, Manufacturing, Legal, etc.) with `id`, `title`, `client`, `date`, and `content`. If the file is missing or invalid, the server falls back to a **2-item in-code list** (Cloud Migration Proposal, Data Center Upgrade) so it still starts.
 
 **Behavior:**
 
@@ -97,7 +112,7 @@ Capabilities: **tools** only.
 - **`opportunities.json`** – 22 opportunities linked to accounts by `accountId`, with `id`, `name`, `amount`, `stageName`, `closeDate`, `probability`, `description`.
 - **`client-context.json`** – 7 client-context profiles (`test-client`, `default`, `e2e`, `airia-demo`, `techcorp`, `finserve`, `meddata`) with `id`, `name`, `version`, `description`, `project`, `environment`.
 
-If a file is missing, the server uses a minimal fallback so it still starts.
+If a file is missing, the server uses a minimal fallback (empty arrays for accounts/opportunities; a single default profile for client-context) so it still starts.
 
 ### 2.1 Tool: `fetch_account`
 

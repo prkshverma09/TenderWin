@@ -13,9 +13,20 @@ This guide explains how to set up TenderWin so the **full user flow runs through
 npm run mcp:gateway
 npx ngrok http 3100
 
+npm run dev --workspace=@tenderwin/word-addin
+npm run ngrok:addin
+
 npm run e2e:real-airia 
 npx playwright show-report 
 
+
+In short:
+
+Terminal 1: MCP gateway (e.g. npm run mcp:gateway).
+Terminal 2: npx ngrok http 3100 — use this HTTPS URL in Airia for the MCP servers.
+Terminal 3: Add-in dev server: npm run dev --workspace=@tenderwin/word-addin.
+Terminal 4: npx localtunnel --port 3050 — use the printed HTTPS URL (e.g. https://something.loca.lt) in apps/word-addin/manifest.xml as SourceLocation, then upload that manifest in Word on the web.
+Terminal 5: start airia proxy: npm run build --workspace=@tenderwin/airia-proxy
 
 ---
 
@@ -28,9 +39,9 @@ The target flow:
 3. The add-in sends the document context (e.g. selected section or full text) to **Airia**.
 4. The **Airia agent** runs: **extract questions → call MCP tools** (SharePoint for past proposals, Salesforce for client context) **→ draft answers → return response + citation data**.
 5. The add-in receives the response, **inserts the drafted text into Word** and shows the **citation widget** (confidence score, sources) from Airia MCP Apps.
-6. Optionally, **“Ping Expert”** triggers a handoff to Teams; the expert’s reply can be fed back (e.g. into Airia or the document).
+6. Optionally, **“Ping Expert”** sends the current draft to the Teams bot; the expert reviews in Teams (Adaptive Card with Approve/Reject), and when they approve, the add-in inserts the expert's reply into the Word document.
 
-Today the Word add-in uses **mock** behavior (inserts “Mocked text” and shows static citation UI). This doc describes how to **configure Airia** and **wire the add-in** so the same UI drives the real Airia E2E flow.
+When Airia is not configured, the Word add-in uses **mock** behavior (inserts mock text and shows static citation UI). This doc describes how to **configure Airia** and **wire the add-in** so the same UI drives the real Airia E2E flow.
 
 ---
 
@@ -109,7 +120,8 @@ Endpoints:
 - **Salesforce MCP:** `http://localhost:3100/salesforce`
 - **Health check:** `http://localhost:3100/health`
 
-To use another port: `MCP_GATEWAY_PORT=3000 npm run mcp:gateway`
+To use another port: `MCP_GATEWAY_PORT=3000 npm run mcp:gateway`  
+Optional API key: set `MCP_GATEWAY_API_KEY` to require an `X-API-Key` header on `/sharepoint` and `/salesforce`; `/health` stays open for readiness checks.
 
 **Option B – Expose for Airia (local dev)**
 
@@ -193,6 +205,8 @@ This creates `apps/word-addin/.env.local` from the root `.env.example` (or a tem
 
 **Option B – Manual:** Create `apps/word-addin/.env.local` with the same variables. Do not commit it (already in `.gitignore`).
 
+**Ping Expert (Teams handoff):** To use the "Ping Expert" button in the add-in, set **`VITE_TEAMS_BOT_URL`** to your Teams bot base URL (e.g. `http://localhost:3978` for local dev). The add-in then POSTs to `/api/handoff` and polls `/api/handoff/status` until the expert approves or rejects in Teams. See root `.env.example` and Section 7.
+
 **Check that config is present (optional):**
 
 ```bash
@@ -224,6 +238,7 @@ The codebase already wires the flow:
 | Call Airia | `apps/word-addin/src/services/airia.ts` – `draftFromDocument(text)` uses `VITE_AIRIA_PROXY_URL` or `VITE_AIRIA_API_*`; returns mock when unset. |
 | Insert into Word | `document.ts` – `insertTextAtSelection(text)` (Office.context.document.body.insertText when in Word). |
 | Citation widget | `App.tsx` – state from `draftFromDocument` result (`confidence`, `sources`); expandable citation UI. |
+| Ping Expert | `App.tsx` – "Ping Expert" button (enabled when draft/citation exists). POSTs to `VITE_TEAMS_BOT_URL/api/handoff` with `{ sessionId, question?, draftText }`, polls `GET .../api/handoff/status?sessionId=...`; on `approved`, inserts `expertReply` into Word. See `apps/word-addin/src/services/handoff.ts`. |
 
 Request/response shape for the **proxy** is: `POST` body `{ documentText }`, response `{ text, confidence?, sources? }`. For the **direct Airia API**, the service uses the endpoint and headers described in [Airia API](https://api.airia.ai/docs/); adjust `airia.ts` if your agent’s API differs.
 
@@ -235,10 +250,20 @@ From repo root:
 npm run dev:addin
 ```
 
-This starts the Word Add-in dev server at **http://localhost:3050**. For **Word** you must load the task pane over **HTTPS**:
+This starts the Word Add-in dev server at **http://localhost:3050**. For **Word** (including Word on the web) you must load the task pane over **HTTPS**. Use either ngrok (local) or a deployed URL.
 
-- **Local:** In another terminal run `npx ngrok http 3050`, then use the ngrok **HTTPS** URL in your Office Add-in manifest’s `SourceLocation`.
-- **Deployed:** Build (`npm run build --workspace=@tenderwin/word-addin`), deploy `apps/word-addin/dist` to Vercel/Netlify, and set `SourceLocation` to that HTTPS URL.
+**What you do next (Word on the web):**
+
+1. **Terminal 1:** `npm run dev --workspace=@tenderwin/word-addin`
+2. **Terminal 2:** Expose the add-in over HTTPS. **Recommended:** `npx cloudflared@latest tunnel --url http://localhost:3050` (no password page). Or `npm run ngrok:addin` if ngrok is free. Copy the HTTPS URL.
+3. In **`apps/word-addin/manifest.xml`**, set `<SourceLocation DefaultValue="https://YOUR-TUNNEL-URL/" />` (e.g. `https://xxx.trycloudflare.com/`). If you see "Blocked request" in Word, the add-in’s Vite config allows `.trycloudflare.com`; ensure `apps/word-addin/vite.config.ts` (and any `vite.config.js`) includes `server.allowedHosts` for your tunnel domain.
+4. **For Draft Answers with Airia:** Set **`VITE_AIRIA_PROXY_URL=http://localhost:3051/airia`** in `apps/word-addin/.env.local` (keeps API key server-side and avoids CORS). Start the proxy: **`npm run dev --workspace=@tenderwin/airia-proxy`** in another terminal. Restart the add-in dev server after changing env.
+5. In Word on the web: **Home → Add-ins → More Settings → Upload My Add-in** → select **`apps/word-addin/manifest.xml`**.
+6. Use **Home → Add-ins → TenderWin** and test **Draft Answers** (and **Ping Expert** if the Teams bot is running).
+
+**Alternatives:** Deploy `apps/word-addin/dist` (after `npm run build --workspace=@tenderwin/word-addin`) to Vercel/Netlify and set `SourceLocation` to that HTTPS URL instead of ngrok.
+
+**E2E with Word on the web (add-in + Airia + MCP):** For the full flow you need **both** the add-in and the MCP gateway reachable at the same time: clicking "Draft Answers" sends context to Airia, and Airia then calls your MCP (SharePoint/Salesforce). Ngrok free tier allows only one tunnel, so use **two different tunnels:** (1) **ngrok for MCP** — keep `npx ngrok http 3100` running and register `https://YOUR-NGROK-URL/sharepoint` and `.../salesforce` in Airia. (2) **Second tunnel for the add-in** — run `npx cloudflared@latest tunnel --url http://localhost:3050` (recommended; no password page) or `npx localtunnel --port 3050` (may show a "Tunnel Password" interstitial—if so, use cloudflared). Use the printed HTTPS URL as `SourceLocation` in `manifest.xml`, then upload the manifest in Word on the web. **Use the Airia proxy** so Draft Answers works from the tunnel: set `VITE_AIRIA_PROXY_URL=http://localhost:3051/airia` in `apps/word-addin/.env.local` and run **`npm run dev --workspace=@tenderwin/airia-proxy`** (proxy reads API key and agent ID from the same .env.local). If Word shows "Blocked request" for the tunnel host, the add-in’s `vite.config.ts` includes `allowedHosts` for `.trycloudflare.com` (and other tunnel domains); ensure no stale `vite.config.js` overrides it.
 
 ### 5.4 Automated E2E test (Draft Answers)
 
@@ -297,8 +322,8 @@ Use this once Airia is configured and the add-in is wired to the API.
 
 - [ ] Airia account created; TenderWin agent created and configured with MCP tools.
 - [ ] SharePoint and Salesforce MCP servers running and registered in Airia; agent can call them successfully in the dashboard.
-- [ ] Add-in env vars set (`VITE_AIRIA_*` or proxy URL); add-in code calls Airia and uses the response for insert + citation UI.
-- [ ] Add-in served over HTTPS and sideloaded in Word (or loaded in browser for UI-only check).
+- [ ] Add-in env: for **Word on the web** use **`VITE_AIRIA_PROXY_URL=http://localhost:3051/airia`** (and keep `VITE_AIRIA_API_KEY`, `VITE_AIRIA_AGENT_ID` in `.env.local` for the proxy). Start the proxy: **`npm run dev --workspace=@tenderwin/airia-proxy`**. For desktop Word you can use direct API vars or the same proxy.
+- [ ] Add-in served over HTTPS and sideloaded in Word (or loaded in browser for UI-only check). For Word on the web: use a tunnel (e.g. `npx cloudflared@latest tunnel --url http://localhost:3050`) and set that URL in the manifest `SourceLocation`.
 - [ ] Sample RFP in Word: e.g. paste `test-data/sample-rfp-section.txt` (see [MANUAL_TESTING_AND_DEMO.md](MANUAL_TESTING_AND_DEMO.md)).
 
 ### 6.2 Step-by-step E2E test
@@ -312,7 +337,9 @@ Use this once Airia is configured and the add-in is wired to the API.
 | 5 | Wait for the response. | Drafted answer appears in the document at the cursor. |
 | 6 | Check the sidebar. | Citation widget shows a confidence score (e.g. from Airia MCP Apps). |
 | 7 | Click a citation (if available). | Source snippet or “Source Data” from the agent response is shown. |
-| 8 | (Optional) Click “Ping Expert.” | Handoff request is sent (e.g. to your Teams bot or Airia); no errors. |
+| 8 | (Optional) Click “Ping Expert.” | Add-in sends handoff to Teams bot; when the expert approves in Teams (Adaptive Card), add-in inserts the expert reply and shows “Expert approved.” |
+
+**When using Word on the web:** Use the same flow; only steps 1–2 differ. (1) Go to [office.com](https://office.com), sign in, open **Word**, and open or create a document with the sample RFP (e.g. paste `test-data/sample-rfp-section.txt`). (2) Open the task pane: **Home → Add-ins → More Settings** to upload **`apps/word-addin/manifest.xml`** if needed, then **Home → Add-ins** → select **TenderWin**. Then follow steps 3–8 above (cursor, Draft Answers, citation, optional Ping Expert).
 
 ### 6.3 What “success” looks like
 
@@ -322,6 +349,9 @@ Use this once Airia is configured and the add-in is wired to the API.
 
 ### 6.4 If something fails
 
+- **ngrok add-in fails (ERR_NGROK_334):** For **E2E with Airia**, you need **both** the add-in (Word on the web) and the MCP gateway reachable at the same time—swapping tunnels is not viable. **Use:** keep ngrok for MCP (port 3100); expose the add-in with a second tunnel, e.g. `npx cloudflared@latest tunnel --url http://localhost:3050`, and set that HTTPS URL in `manifest.xml` as `SourceLocation`. See "E2E with Word on the web" in §5.3 and [MANUAL_TESTING_AND_DEMO.md](MANUAL_TESTING_AND_DEMO.md) §7.
+- **"Request to Airia failed (often CORS…)" in Word on the web:** The add-in (loaded from a tunnel) cannot call the Airia API directly from the browser due to CORS. **Use the Airia proxy:** set `VITE_AIRIA_PROXY_URL=http://localhost:3051/airia` in `apps/word-addin/.env.local`, start `npm run dev --workspace=@tenderwin/airia-proxy`, restart the add-in dev server, then try Draft Answers again. See [MANUAL_TESTING_AND_DEMO.md](MANUAL_TESTING_AND_DEMO.md) §7.
+- **"Blocked request. This host (…trycloudflare.com) is not allowed":** Vite is rejecting the tunnel host. The repo’s `apps/word-addin/vite.config.ts` (and `vite.config.js`) set `server.allowedHosts` for `.trycloudflare.com`, `.ngrok-free.app`, `.ngrok.io`, `.loca.lt`. Restart the add-in dev server; if the error persists, ensure no other `vite.config.js` without `allowedHosts` is overriding (e.g. delete a stale compiled `vite.config.js` so Vite uses `vite.config.ts`).
 - **No response / 401:** Check API key and agent ID; confirm the add-in (or proxy) sends the right headers and URL.
 - **Agent doesn’t use MCP:** In Airia, confirm the TenderWin agent has the SharePoint and Salesforce tools attached and that test prompts in the dashboard return tool results.
 - **Wrong or empty text in Word:** Inspect the API response in the add-in; ensure you’re parsing the correct field for “answer text” and inserting it at the selection.
@@ -331,13 +361,13 @@ Use this once Airia is configured and the add-in is wired to the API.
 
 ## 7. Optional: Ping Expert (Teams) in the E2E flow
 
-To test the full “Ping Expert” path with Airia:
+The add-in implements the full "Ping Expert" flow:
 
-1. In the add-in, when the user clicks “Ping Expert,” send a request to your **Teams bot** (e.g. `POST /api/handoff`) with context (e.g. question, draft answer, document ID).  
-2. The bot sends a proactive message to the expert in Teams (e.g. “Hey Sarah, please review…”).  
-3. When the expert replies or approves (e.g. via adaptive card), the bot (or a webhook) can:
-   - Notify Airia or the add-in, and/or  
-   - Update the document (e.g. via Graph API or a callback the add-in polls).
+1. **Add-in:** User clicks "Ping Expert" (enabled after a draft exists). The add-in POSTs to `VITE_TEAMS_BOT_URL/api/handoff` with `{ sessionId, question?, draftText }`, shows "Waiting for expert…", and polls `GET .../api/handoff/status?sessionId=...` every 2–3 seconds.
+2. **Teams bot:** The same server exposes `/api/handoff`, `/api/handoff/status`, and **POST /api/messages** (Bot Framework). When the expert in Teams says "Ping Expert," the bot sends an **Adaptive Card** with the latest pending handoff and **Approve** / **Reject** buttons. When the expert clicks Approve, the bot updates the handoff store; the add-in's next poll returns `status: 'approved'` and optional `expertReply`.
+3. **Add-in:** When the poll returns `status: 'approved'`, the add-in inserts the expert reply (or draft) into the document and shows "Expert approved."
+
+**To test:** Set `VITE_TEAMS_BOT_URL=http://localhost:3978`, start the Teams bot (`node apps/teams-bot/dist/server.js` after building), run "Draft Answers" then "Ping Expert" in the add-in. In Teams (or Bot Framework Emulator), say "Ping Expert" to receive the card, then click Approve. The add-in updates within a few seconds.
 
 Including this in E2E is optional; the core E2E with Airia is **Word → Add-in → Airia (agent + MCP) → back to Word and citation widget**.
 
@@ -351,7 +381,7 @@ Including this in E2E is optional; the core E2E with Airia is **Word → Add-in 
 | Airia docs | [explore.airia.com](https://explore.airia.com/home), [api.airia.ai](https://api.airia.ai/docs/) |
 | Hackathon resources | [airia-hackathon.devpost.com/resources](https://airia-hackathon.devpost.com/resources) |
 | MCP servers (this repo) | `packages/mcp-sharepoint`, `packages/mcp-salesforce` |
-| Add-in env (example) | `apps/word-addin/.env`: `VITE_AIRIA_API_URL`, `VITE_AIRIA_API_KEY`, `VITE_AIRIA_AGENT_ID` |
+| Add-in env (example) | `apps/word-addin/.env.local`: `VITE_AIRIA_API_URL`, `VITE_AIRIA_API_KEY`, `VITE_AIRIA_AGENT_ID`; for Ping Expert add `VITE_TEAMS_BOT_URL=http://localhost:3978` |
 | Sample RFP for E2E | `test-data/sample-rfp-section.txt` or `sample-rfp-full.txt` |
 | General manual testing | [MANUAL_TESTING_AND_DEMO.md](MANUAL_TESTING_AND_DEMO.md) |
 | Submission and demo | [SUBMISSION_AND_DEMO.md](SUBMISSION_AND_DEMO.md) |

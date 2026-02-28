@@ -20,7 +20,8 @@
     "dev:addin": "npm run dev --workspace=@tenderwin/word-addin",
     "dev:airia-proxy": "npm run dev --workspace=@tenderwin/airia-proxy",
     "e2e": "npm run test --workspace=@tenderwin/e2e-tests --",
-    "e2e:real-airia": "bash scripts/e2e-real-airia.sh"
+    "e2e:real-airia": "bash scripts/e2e-real-airia.sh",
+    "ngrok:addin": "npx ngrok http 3050"
   },
   "devDependencies": {
     "turbo": "^2.0.0",

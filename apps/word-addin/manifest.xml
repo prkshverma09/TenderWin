@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TenderWin Word Add-in manifest (traditional XML, for sideloading).
+  For Word on the web: replace the SourceLocation URL below with your ngrok HTTPS URL
+  (e.g. https://abc123.ngrok-free.app/) after running: npx ngrok http 3050
+-->
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:type="TaskPaneApp">
+  <Id>a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d</Id>
+  <Version>1.0.0</Version>
+  <ProviderName>TenderWin</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="TenderWin" />
+  <Description DefaultValue="Draft RFP answers with AI and citations. Use Draft Answers and optionally Ping Expert for review." />
+  <SupportUrl DefaultValue="https://github.com" />
+  <Hosts>
+    <Host Name="Document" />
+  </Hosts>
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://dylan-qty-soma-leaving.trycloudflare.com" />
+  </DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+</OfficeApp>

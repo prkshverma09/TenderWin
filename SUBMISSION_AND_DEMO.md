@@ -83,7 +83,7 @@ Step-by-step outline for deploying TenderWin, publishing to the Airia Community,
 | **2:30–3:15** | **Agent Constraints:** Open the Airia Admin Dashboard. Show the Agent Constraint that restricts access (e.g. no HR/restricted files) or limits writes to the current document. |
 | **3:15–4:00** | **Teams handoff:** Trigger “Ping Expert,” show the message in Teams and the expert’s reply, then show the Word document updating. End with one line on impact (time saved, revenue). |
 
-**Before recording:** Test the full flow (Word → Airia → MCP → Word; Word → Teams → expert → Word) and have the Airia Community URL and Devpost submission page open.
+**Before recording:** Test the full flow (Word → Airia → MCP → Word; Word → Teams → expert → Word) and have the Airia Community URL and Devpost submission page open. For the Ping Expert segment: set `VITE_TEAMS_BOT_URL` in `apps/word-addin/.env.local` to your Teams bot URL (e.g. `http://localhost:3978` for local dev, or your deployed bot URL for a live demo).
 
 ---
 
