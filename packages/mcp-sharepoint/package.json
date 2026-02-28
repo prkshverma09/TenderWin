@@ -2,6 +2,7 @@
   "name": "@tenderwin/mcp-sharepoint",
   "version": "1.0.0",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "test": "vitest run",

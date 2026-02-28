@@ -1,6 +1,19 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
+
+jest.mock('../../services/airia', () => ({
+  draftFromDocument: jest.fn().mockResolvedValue({
+    text: 'Mocked text',
+    confidence: 92,
+    sources: [{ title: 'MCP App Mock Data', snippet: 'Matched with requirements document section 3.2' }],
+  }),
+}));
+
+jest.mock('../document', () => ({
+  getDocumentText: jest.fn().mockResolvedValue('Sample RFP section text'),
+  insertTextAtSelection: jest.fn().mockResolvedValue(undefined),
+}));
 
 beforeAll(() => {
   (global as any).Office = {
@@ -25,11 +38,14 @@ describe('App Component', () => {
     expect(button).toBeInTheDocument();
   });
 
-  it('calls Office.context.document.body.insertText when Draft Answers is clicked', () => {
+  it('calls insertTextAtSelection (document) when Draft Answers is clicked', async () => {
+    const { insertTextAtSelection } = await import('../document');
     render(<App />);
     const button = screen.getByRole('button', { name: /draft answers/i });
     fireEvent.click(button);
-    expect((global as any).Office.context.document.body.insertText).toHaveBeenCalledWith('Mocked text');
+    await waitFor(() => {
+      expect(insertTextAtSelection).toHaveBeenCalledWith('Mocked text');
+    });
   });
 
   it('renders an interactive citation widget with mock MCP App data (Confidence Score)', () => {
