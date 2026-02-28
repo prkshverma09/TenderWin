@@ -19,18 +19,24 @@ const PORT = parseInt(process.env.MCP_GATEWAY_PORT ?? '3100', 10);
 const app = express();
 app.use(express.json({ limit: '1mb' }));
 
+function defaultSessionIdGenerator(): string {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
+}
+
 // Stateless: each request gets a new transport and server instance
 async function handleSharePoint(req: express.Request, res: express.Response) {
-  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: defaultSessionIdGenerator });
   const mcp = new SharePointServer();
-  await mcp.server.connect(transport);
+  await mcp.server.connect(transport as Parameters<SharePointServer['server']['connect']>[0]);
   await transport.handleRequest(req, res, req.body as Record<string, unknown>);
 }
 
 async function handleSalesforce(req: express.Request, res: express.Response) {
-  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: defaultSessionIdGenerator });
   const server = createSalesforceServer();
-  await server.connect(transport);
+  await server.connect(transport as Parameters<ReturnType<typeof createSalesforceServer>['connect']>[0]);
   await transport.handleRequest(req, res, req.body as Record<string, unknown>);
 }
 

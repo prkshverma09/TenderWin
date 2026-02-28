@@ -1,0 +1,58 @@
+[
+  {
+    "id": "test-client",
+    "name": "test-client",
+    "version": "1.0.0",
+    "description": "Default context for tests and when no client id is provided.",
+    "project": "TenderWin",
+    "environment": "test"
+  },
+  {
+    "id": "default",
+    "name": "TenderWin Word Add-in",
+    "version": "1.0.0",
+    "description": "Default client when invoking from Word add-in or E2E.",
+    "project": "TenderWin",
+    "environment": "production"
+  },
+  {
+    "id": "e2e",
+    "name": "TenderWin E2E Test",
+    "version": "1.0.0",
+    "description": "Client context when running automated E2E tests.",
+    "project": "TenderWin",
+    "environment": "test"
+  },
+  {
+    "id": "airia-demo",
+    "name": "Airia TenderWin Agent",
+    "version": "2.0.0",
+    "description": "Airia agent drafting RFP answers with MCP tools.",
+    "project": "TenderWin",
+    "environment": "production"
+  },
+  {
+    "id": "techcorp",
+    "name": "TechCorp Industries",
+    "version": "1.0.0",
+    "description": "TechCorp procurement portal integration.",
+    "project": "TechCorp RFP",
+    "environment": "production"
+  },
+  {
+    "id": "finserve",
+    "name": "FinServe Bank",
+    "version": "1.0.0",
+    "description": "FinServe vendor and RFP management.",
+    "project": "FinServe Procurement",
+    "environment": "production"
+  },
+  {
+    "id": "meddata",
+    "name": "MedData Solutions",
+    "version": "1.0.0",
+    "description": "MedData healthcare procurement.",
+    "project": "MedData RFP",
+    "environment": "production"
+  }
+]

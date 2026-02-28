@@ -9,6 +9,14 @@ This guide explains how to set up TenderWin so the **full user flow runs through
 - [Airia API documentation](https://api.airia.ai/docs/)
 - [Hackathon resources](https://airia-hackathon.devpost.com/resources) (Getting Started PDF, Design Patterns, Discord)
 
+# TLDR
+npm run mcp:gateway
+npx ngrok http 3100
+
+npm run e2e:real-airia 
+npx playwright show-report 
+
+
 ---
 
 ## 1. What “E2E with Airia” Means

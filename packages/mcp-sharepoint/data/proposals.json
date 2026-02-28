@@ -1,0 +1,142 @@
+[
+  {
+    "id": "1",
+    "title": "Cloud Migration Proposal – Infrastructure Modernization",
+    "client": "TechCorp Industries",
+    "date": "2025-01-15",
+    "content": "Proposal to migrate on-premise infrastructure to AWS cloud. Covers data encryption at rest and in transit (AES-256, TLS 1.3), RBAC and MFA integration with Okta, SOC 2 Type II and ISO 27001 compliance, and 99.99% SLA for critical workloads."
+  },
+  {
+    "id": "2",
+    "title": "Data Center Upgrade and 400G Networking",
+    "client": "GlobalNet Communications",
+    "date": "2024-11-20",
+    "content": "Upgrading primary data center to support 400G networking and hybrid cloud connectivity. Includes audit logging (retention 7 years), integration with Splunk for SIEM, and GDPR-ready data handling with regional residency."
+  },
+  {
+    "id": "3",
+    "title": "Enterprise Security and Compliance Platform",
+    "client": "FinServe Bank",
+    "date": "2025-02-01",
+    "content": "Implementation of enterprise security platform: data encryption (key management via HSM), access control with RBAC and MFA, audit logs (export to CSV/JSON), and attestation for SOC 2, PCI-DSS, and ISO 27001. Includes penetration testing and vulnerability management."
+  },
+  {
+    "id": "4",
+    "title": "Healthcare Data Platform – HIPAA and HITRUST",
+    "client": "MedData Solutions",
+    "date": "2024-09-12",
+    "content": "Secure healthcare data platform with HIPAA and HITRUST alignment. End-to-end encryption, identity provider integration (Azure AD, Okta), comprehensive audit trails, and BAA readiness. Data residency options for US and EU."
+  },
+  {
+    "id": "5",
+    "title": "Government Cloud – FedRAMP Moderate",
+    "client": "Public Sector Agency",
+    "date": "2024-08-05",
+    "content": "FedRAMP Moderate authorized cloud offering. FISMA controls, encryption (FIPS 140-2 validated), PIV/CAC authentication, continuous monitoring, and incident response procedures. Covers IL4/IL5 data."
+  },
+  {
+    "id": "6",
+    "title": "Retail CRM and Customer Data Platform",
+    "client": "RetailMax Inc.",
+    "date": "2025-01-28",
+    "content": "Unified CRM and CDP with encryption for PII, role-based access, audit logs for all data access, and GDPR/CCPA compliance. Includes data retention policies and right-to-deletion workflows."
+  },
+  {
+    "id": "7",
+    "title": "Manufacturing IoT and Edge Security",
+    "client": "IndusTech Manufacturing",
+    "date": "2024-10-18",
+    "content": "IoT and edge deployment with secure device attestation, encrypted device-to-cloud pipelines, zero-trust network access, and OT/IT security monitoring. Compliance with IEC 62443 and NIST CSF."
+  },
+  {
+    "id": "8",
+    "title": "Financial Services – Trading and Risk Platform",
+    "client": "CapMark Securities",
+    "date": "2024-12-02",
+    "content": "Trading and risk platform with encryption for market and client data, MFA and session controls, full audit trail for regulatory reporting (SEC, MiFID II), and SOC 2 Type II. Disaster recovery RTO 4 hours."
+  },
+  {
+    "id": "9",
+    "title": "Education – Student and Faculty Portal",
+    "client": "State University System",
+    "date": "2024-07-22",
+    "content": "Student and faculty portal with FERPA-aligned access controls, encryption for student records, SSO (SAML 2.0), and audit logging. Integration with existing identity and LMS systems."
+  },
+  {
+    "id": "10",
+    "title": "Energy Sector – SCADA and Grid Security",
+    "client": "GridPower Co.",
+    "date": "2025-02-14",
+    "content": "SCADA and grid management with NERC CIP alignment, network segmentation, encrypted communications, role-based access for operators, and 24/7 security monitoring with retention per NERC requirements."
+  },
+  {
+    "id": "11",
+    "title": "Insurance – Policy and Claims Platform",
+    "client": "SureGuard Insurance",
+    "date": "2024-11-08",
+    "content": "Policy and claims platform with encryption for PHI and PII, RBAC by department and region, audit logs for all policy and claim actions, and compliance with state insurance regulations and SOC 2."
+  },
+  {
+    "id": "12",
+    "title": "Telecom – BSS/OSS and Billing",
+    "client": "Telco Global",
+    "date": "2024-06-30",
+    "content": "BSS/OSS and billing modernization. Encryption for customer and billing data, integration with carrier identity systems, audit and reconciliation logs, and GDPR-compliant data handling for EU subscribers."
+  },
+  {
+    "id": "13",
+    "title": "Legal – Matter and Document Management",
+    "client": "LawFirm Partners LLP",
+    "date": "2025-03-01",
+    "content": "Matter and document management with client-file encryption, matter-based access control, privilege-preserving search, and audit trails for bar and ethics requirements. eDiscovery and retention policy support."
+  },
+  {
+    "id": "14",
+    "title": "Logistics – Supply Chain Visibility",
+    "client": "ShipWise Logistics",
+    "date": "2024-10-01",
+    "content": "Supply chain visibility platform with encrypted shipment and partner data, role-based access by carrier and shipper, audit logs for all events, and C-TPAT and customs compliance documentation."
+  },
+  {
+    "id": "15",
+    "title": "Media – Content and Rights Management",
+    "client": "StreamVault Media",
+    "date": "2024-09-15",
+    "content": "Content and rights management with DRM and encryption for assets, role-based permissions by territory and role, full audit trail for rights and distribution, and integration with existing MAM."
+  },
+  {
+    "id": "16",
+    "title": "HR and Payroll – Global Workforce",
+    "client": "PeopleFirst HR",
+    "date": "2024-08-20",
+    "content": "Global HR and payroll with encryption for employee data, role-based access by country and function, audit logs for payroll and personal data access, and GDPR/local labor law compliance."
+  },
+  {
+    "id": "17",
+    "title": "Real Estate – Property and Portfolio Management",
+    "client": "PropStack Realty",
+    "date": "2025-01-10",
+    "content": "Property and portfolio management with encrypted tenant and financial data, RBAC by property and role, audit trail for leases and payments, and SOC 2 and data residency options."
+  },
+  {
+    "id": "18",
+    "title": "Automotive – Connected Vehicle Data",
+    "client": "AutoDrive Motors",
+    "date": "2024-12-15",
+    "content": "Connected vehicle data platform with encryption for telemetry and driver data, access control by OEM and dealer, audit logs for data access, and alignment with UNECE and regional privacy regulations."
+  },
+  {
+    "id": "19",
+    "title": "Pharma – Clinical Trial and R&D Platform",
+    "client": "BioPharm Research",
+    "date": "2024-07-08",
+    "content": "Clinical trial and R&D platform with encryption for trial and patient data, 21 CFR Part 11–aligned access and audit, role-based access by study and site, and GxP documentation and retention."
+  },
+  {
+    "id": "20",
+    "title": "Utilities – Smart Meter and Billing",
+    "client": "CityPower Utility",
+    "date": "2024-11-01",
+    "content": "Smart meter and billing with encryption for consumption and customer data, RBAC for operations and customer service, audit logs for meter and billing events, and NIST IR 7628 and state regulatory alignment."
+  }
+]

@@ -54,8 +54,9 @@ test('Word Add-in: Draft Answers works E2E (stubbed Airia)', async ({ page }) =>
   await expect(citationWidget).toContainText(`Confidence Score: ${STUB_RESPONSE.confidence}%`);
 
   await citationWidget.click();
-  await expect(page.getByText(`Source Data: ${STUB_RESPONSE.sources[0].title}`)).toBeVisible();
-  await expect(page.getByText(STUB_RESPONSE.sources[0].snippet)).toBeVisible();
+  const firstSource = STUB_RESPONSE.sources[0];
+  await expect(page.getByText(`Source Data: ${firstSource!.title}`)).toBeVisible();
+  await expect(page.getByText(firstSource!.snippet)).toBeVisible();
 });
 
 test('Word Add-in: Draft Answers works E2E (real Airia)', async ({ page }) => {

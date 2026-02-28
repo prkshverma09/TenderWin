@@ -1,3 +1,6 @@
+import { readFileSync, existsSync } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -10,25 +13,31 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 
-const mockProposals = [
-  {
-    id: '1',
-    title: 'Cloud Migration Proposal',
-    client: 'TechCorp',
-    date: '2025-01-15',
-    content: 'Proposal to migrate on-premise infrastructure to AWS cloud...'
-  },
-  {
-    id: '2',
-    title: 'Data Center Upgrade',
-    client: 'GlobalNet',
-    date: '2024-11-20',
-    content: 'Upgrading primary data center to support 400G networking...'
-  }
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export type Proposal = { id: string; title: string; client: string; date: string; content: string };
+
+const FALLBACK_PROPOSALS: Proposal[] = [
+  { id: '1', title: 'Cloud Migration Proposal', client: 'TechCorp', date: '2025-01-15', content: 'Proposal to migrate on-premise infrastructure to AWS cloud...' },
+  { id: '2', title: 'Data Center Upgrade', client: 'GlobalNet', date: '2024-11-20', content: 'Upgrading primary data center to support 400G networking...' },
 ];
 
+function loadProposals(): Proposal[] {
+  const dataPath = path.join(__dirname, '..', 'data', 'proposals.json');
+  if (!existsSync(dataPath)) return FALLBACK_PROPOSALS;
+  try {
+    const raw = JSON.parse(readFileSync(dataPath, 'utf-8'));
+    return Array.isArray(raw) ? raw as Proposal[] : FALLBACK_PROPOSALS;
+  } catch {
+    return FALLBACK_PROPOSALS;
+  }
+}
+
+const proposals = loadProposals();
+
+/** Exposed for tests. Returns the proposals currently used by the server (from JSON or fallback). */
 export function getMockProposals() {
-  return mockProposals;
+  return proposals;
 }
 
 const searchProposalsSchema = z.object({
@@ -48,7 +57,7 @@ export const handleCallTool = async (request: any) => {
   }
 
   const query = parsed.data.query.toLowerCase();
-  const results = mockProposals.filter(p => 
+  const results = proposals.filter(p => 
     p.title.toLowerCase().includes(query) || 
     p.client.toLowerCase().includes(query) || 
     p.content.toLowerCase().includes(query)
@@ -66,7 +75,7 @@ export const handleCallTool = async (request: any) => {
 
 export const handleListResources = async () => {
   return {
-    resources: mockProposals.map(p => ({
+    resources: proposals.map(p => ({
       uri: `sharepoint://proposals/${p.id}`,
       name: `SharePoint Proposal: ${p.title}`,
       description: `Past proposal for ${p.client} on ${p.date}`,
@@ -84,7 +93,7 @@ export const handleReadResource = async (request: any) => {
   }
 
   const id = match[1];
-  const proposal = mockProposals.find(p => p.id === id);
+  const proposal = proposals.find(p => p.id === id);
 
   if (!proposal) {
     throw new McpError(ErrorCode.InvalidRequest, `Resource not found: ${uri}`);

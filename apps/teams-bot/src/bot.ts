@@ -1,4 +1,5 @@
-import { ActivityHandler, ConversationState, UserState, StatePropertyAccessor } from 'botbuilder';
+import { ActivityHandler, ConversationState, UserState } from 'botbuilder';
+import type { StatePropertyAccessor } from 'botbuilder';
 
 export class TenderWinBot extends ActivityHandler {
     private requestStatusAccessor: StatePropertyAccessor<string>;
